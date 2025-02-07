@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
   
-  spec.add_dependency "typesense", "~> 0.14.0"
+  spec.add_dependency "typesense", "~> 2.1.0"
   spec.add_dependency "activesupport", ">= 5.0"
 
   spec.add_development_dependency "rake", "~> 13.0"
