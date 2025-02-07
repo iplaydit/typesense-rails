@@ -27,6 +27,8 @@ module TypesenseModel
     def default_queryable_fields
       @model_class.schema_definition.fields
         .select { |f| f[:index] }
+        .select { |f| f[:type] == 'string' }
+        .reject { |f| f[:name] == 'id' }
         .map { |f| f[:name] }
         .join(',')
     end
