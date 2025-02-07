@@ -1,9 +1,10 @@
 module TypesenseModel
   class Schema
-    attr_reader :fields
+    attr_reader :fields, :collection_name
 
-    def initialize
+    def initialize(collection_name = nil)
       @fields = []
+      @collection_name = collection_name
     end
 
     def field(name, type, options = {})
@@ -18,10 +19,16 @@ module TypesenseModel
 
     def to_hash
       {
-        name: collection_name,
+        name: @collection_name,
         fields: @fields,
         default_sorting_field: default_sorting_field
-      }
+      }.compact
+    end
+
+    private
+
+    def default_sorting_field
+      @fields.find { |f| f[:name] == 'id' }&.dig(:name)
     end
   end
 end 

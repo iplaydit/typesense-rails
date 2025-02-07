@@ -1,17 +1,23 @@
 module TypesenseModel
   class Base
-    class_attribute :collection_name
-    class_attribute :schema_definition
-
     class << self
+      attr_accessor :_collection_name, :_schema_definition
+
       def collection_name(name = nil)
-        self.collection_name = name if name
-        self.collection_name ||= self.name.underscore.pluralize
+        if name
+          @_collection_name = name
+        else
+          @_collection_name ||= self.name.underscore.pluralize
+        end
       end
 
       def define_schema(&block)
-        self.schema_definition = Schema.new
-        schema_definition.instance_eval(&block)
+        @_schema_definition = Schema.new
+        @_schema_definition.instance_eval(&block)
+      end
+
+      def schema_definition
+        @_schema_definition
       end
 
       def create(attributes = {})
@@ -39,17 +45,17 @@ module TypesenseModel
     attr_accessor :attributes
 
     def initialize(attributes = {})
-      @attributes = attributes
+      @attributes = attributes.transform_keys(&:to_s)
     end
 
     def save
       response = if id
-        client.collections[collection_name].documents[id].update(attributes)
+        self.class.send(:client).collections[self.class.collection_name].documents[id].update(attributes)
       else
-        client.collections[collection_name].documents.create(attributes)
+        self.class.send(:client).collections[self.class.collection_name].documents.create(attributes)
       end
       
-      @attributes = response
+      @attributes = response.transform_keys(&:to_s)
       self
     end
 
