@@ -17,7 +17,7 @@ module TypesenseModel
           port: port,
           protocol: protocol
         }],
-        connection_timeout_seconds: 2
+        connection_timeout_seconds: 5
       )
     end
   end

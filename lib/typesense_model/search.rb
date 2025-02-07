@@ -50,12 +50,46 @@ module TypesenseModel
       end
     end
 
+    def map(&block)
+      hits.map do |hit|
+        block.call(@model_class.new(hit['document']))
+      end
+    end
+
     def hits
       @raw_response['hits'] || []
     end
 
+    def size
+      total_hits
+    end
+
     def total_hits
       @raw_response['found'] || 0
+    end
+    # PAGY COMPATIBILITY
+    def count(_)
+      total_hits
+    end
+    def offset(_)
+      self
+    end
+    def limit(_)
+      self
+    end
+
+    def facets
+      @raw_response['facet_counts'] || []
+    end
+
+    # Get a specific facet by field name
+    def facet(field_name)
+      facets.find { |f| f['field_name'] == field_name.to_s }
+    end
+
+    # Get facet values for a specific field
+    def facet_values(field_name)
+      facet(field_name)&.fetch('counts', []) || []
     end
   end
 end 

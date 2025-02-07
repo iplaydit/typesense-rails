@@ -171,7 +171,7 @@ module TypesenseModel
         return attributes[attribute_name]
       end
       
-      super
+      nil
     end
 
     def respond_to_missing?(method_name, include_private = false)
