@@ -76,6 +76,59 @@ module TypesenseModel
         collection_exists? ? update_collection : create_collection
       end
 
+      # Retrieve collection details
+      def retrieve_collection
+        return nil unless collection_exists?
+        client.collections[collection_name].retrieve
+      end
+
+      # Get collection stats
+      def collection_stats
+        return nil unless collection_exists?
+        client.collections[collection_name].stats
+      end
+
+      # Get number of documents in collection
+      def count
+        collection_stats&.dig('num_documents') || 0
+      end
+
+      # Import multiple records
+      # @return [Hash] { success: Integer, failed: Integer }
+      def import(documents, options = {})
+        response = client.collections[collection_name]
+          .documents
+          .import(documents, options)
+
+        results = response.each_with_object({ success: 0, failed: 0 }) do |result, counts|
+          result['success'] ? counts[:success] += 1 : counts[:failed] += 1
+        end
+
+        results
+      end
+
+      # Import records from an ActiveRecord model
+      # @param model_class [Class] The ActiveRecord model class to import from
+      # @param batch_size [Integer] Number of records to fetch per batch
+      # @param transform_method [Symbol, Proc] Method or Proc to transform records
+      # @param import_options [Hash] Options to pass to the import method
+      # @return [Hash] { success: Integer, failed: Integer }
+      def import_from_model(model_class, batch_size, transform_method = :as_json, import_options = {})
+        total_results = { success: 0, failed: 0 }
+
+        transformer = transform_method.is_a?(Proc) ? transform_method : ->(record) { record.send(transform_method) }
+
+        model_class.find_in_batches(batch_size: batch_size) do |batch|
+          documents = batch.map(&transformer)
+          results = import(documents, import_options)
+          
+          total_results[:success] += results[:success]
+          total_results[:failed] += results[:failed]
+        end
+
+        total_results
+      end
+
       private
 
       def client
