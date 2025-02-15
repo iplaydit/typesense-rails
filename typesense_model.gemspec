@@ -3,12 +3,12 @@ require_relative 'lib/typesense_model/version'
 Gem::Specification.new do |spec|
   spec.name          = "typesense_model"
   spec.version       = TypesenseModel::VERSION
-  spec.authors       = ["Your Name"]
-  spec.email         = ["your.email@example.com"]
+  spec.authors       = ["Emanuel Comsa"]
+  spec.email         = ["cremzinc@gmail.com"]
 
   spec.summary       = "ActiveModel-like interface for Typesense"
   spec.description   = "A Ruby gem that provides an ActiveModel-like interface for working with Typesense search engine"
-  spec.homepage      = "https://github.com/yourusername/typesense_model"
+  spec.homepage      = "https://github.com/iplaydit/typesense-rails"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.6.0")
 

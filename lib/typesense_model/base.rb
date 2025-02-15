@@ -129,6 +129,22 @@ module TypesenseModel
         total_results
       end
 
+      # Delete a record by ID
+      def delete(id)
+        client.collections[collection_name]
+          .documents[id]
+          .delete
+      rescue Typesense::Error::ObjectNotFound
+        false
+      end
+
+      # Delete multiple records by query
+      def delete_by(filter_by)
+        client.collections[collection_name]
+          .documents
+          .delete({ filter_by: filter_by })
+      end
+
       private
 
       def client
@@ -143,11 +159,7 @@ module TypesenseModel
     end
 
     def save
-      response = if id
-        self.class.send(:client).collections[self.class.collection_name].documents[id].update(attributes)
-      else
-        self.class.send(:client).collections[self.class.collection_name].documents.create(attributes)
-      end
+      response = self.class.send(:client).collections[self.class.collection_name].documents.upsert(attributes)
       
       @attributes = response.transform_keys(&:to_s)
       self
@@ -189,6 +201,14 @@ module TypesenseModel
 
     def client
       self.class.send(:client)
+    end
+
+    # Instance method to delete the current record
+    def delete
+      return false unless id
+      
+      response = self.class.delete(id)
+      !response.nil?
     end
   end
 end 
